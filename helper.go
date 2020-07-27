@@ -24,7 +24,11 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 		SetFormData(params).
 		Post(uri)
 
-	return resp.String(), err
+	if err != nil {
+		return "", err
+	}
+
+	return resp.String(), nil
 
 }
 
