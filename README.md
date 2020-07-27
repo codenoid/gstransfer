@@ -69,7 +69,7 @@ go build -trimpath
 ## FAQ
 
 Q: What if the app crash/exit in the middle progress ?
-A: don't worry, just define your existing -id, for recovering from server-crash put `-db-path` anywhere besides `/tmp`
+> don't worry, just define your existing -id, for recovering from server-crash put `-db-path` anywhere besides `/tmp`
 
 Q: What good server spec for the server mode ?
-A: most of my file are lower than 50MB, i can just go with GCP `f1-micro`
+> most of my file are lower than 50MB, i can just go with GCP `f1-micro`
