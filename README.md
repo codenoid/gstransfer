@@ -2,6 +2,10 @@
 
 Google Cloud Storage upload relay/gateway with destination path rewrite support & zero disk allocation, **unstable** version.
 
+## Installation
+
+Currently we only provide .deb package, [get it here](https://github.com/codenoid/gstransfer/releases), or [Build from source](#building-from-source)
+
 ## Usage
 
 there is two part of gstransfer, server and client/uploader
