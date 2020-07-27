@@ -38,7 +38,7 @@ func init() {
 	// client mode
 	flag.StringVar(&processID, "id", "", "define process id, this will enable re-upload without duplicate file on app crash")
 	flag.StringVar(&sourceDir, "source", "", "full path to your source directory")
-	flag.StringVar(&dstRule, "dst-rule", "dir-0/.../filename", "dir-0 is root of chosen directory, and so on, and 'filename' is your file original filename, you can add custom prefix")
+	flag.StringVar(&dstRule, "dst-rule", "dir-0/../filename", "dir-0 is root of chosen directory, and so on, and 'filename' is your file original filename, you can add custom prefix")
 	flag.StringVar(&dbPath, "db-path", "/tmp/gstransfer", "full path to database folder, will automatically craete if not exist")
 	flag.StringVar(&serverURL, "server", "", "your server url")
 	flag.StringVar(&gsBucket, "bucket", "", "your bucket name")

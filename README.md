@@ -20,7 +20,7 @@ Usage of ./gstransfer:
   -db-path string
     	full path to database folder, will automatically craete if not exist (default "/tmp/gstransfer")
   -dst-rule string
-    	dir-0 is root of chosen directory, and so on, and 'filename' is your file original filename, you can add custom prefix (default "dir-0/.../filename")
+    	dir-0 is root of chosen directory, and so on, and 'filename' is your file original filename, you can add custom prefix (default "dir-0/../filename")
   -id string
     	define process id, this will enable re-upload without duplicate file on app crash
   -max-size int
