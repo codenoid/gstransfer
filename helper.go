@@ -6,51 +6,26 @@ import (
 	"bytes"
 	"errors"
 	"io/ioutil"
-	"mime/multipart"
-	"net/http"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/go-resty/resty/v2"
 )
 
 // Creates a new file upload http request with optional extra params
-func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Response, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	_, err = ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-	fi, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	file.Close()
+func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (string, error) {
 
-	body := new(bytes.Buffer)
-	writer := multipart.NewWriter(body)
+	file, _ := ioutil.ReadFile(path)
+	// Create a Resty Client
+	client := resty.New()
 
-	_, err = writer.CreateFormFile(paramName, fi.Name())
-	if err != nil {
-		return nil, err
-	}
+	resp, err := client.R().
+		SetFileReader("file", "test-img.png", bytes.NewReader(file)).
+		SetFormData(params).
+		Post(uri)
 
-	for key, val := range params {
-		_ = writer.WriteField(key, val)
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, err
-	}
+	return resp.String(), err
 
-	client := &http.Client{}
-
-	req, _ := http.NewRequest("POST", uri, body)
-	req.Header.Add("Content-Type", writer.FormDataContentType())
-
-	return client.Do(req)
 }
 
 func destObjectRewrite(source, format string) (string, error) {
@@ -62,7 +37,7 @@ func destObjectRewrite(source, format string) (string, error) {
 
 	objName := []string{}
 
-	if len(sourceArr) > len(formatArr) {
+	if len(sourceArr) >= len(formatArr) {
 		latestDirIdx := 0
 
 		for _, path := range formatArr {

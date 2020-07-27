@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -103,8 +102,7 @@ func main() {
 								if err != nil {
 									log.Println("upload error", err)
 								} else {
-									b, _ := ioutil.ReadAll(resp.Body)
-									log.Printf("uploaded successfully, took %s with resp: %s \n", elapsed, string(b))
+									log.Printf("uploaded successfully, took %s with resp: %s \n", elapsed, resp)
 
 									// Start a writable transaction.
 									txn := db.NewTransaction(true)
