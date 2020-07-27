@@ -33,7 +33,7 @@ For server, make sure you had access to bucket target, define GOOGLE_APPLICATION
 
 ```bash
 $ # start gstransfer server
-$ gstransfer -bind 0.0.0.0:3000
+$ gstransfer -bind 0.0.0.0:3000 -max-size 150
 ```
 
 ### Client/Uploader
