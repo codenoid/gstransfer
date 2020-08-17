@@ -27,6 +27,8 @@ var dbPath string
 var serverURL string
 var gsBucket string
 
+var database *badger.DB
+
 func init() {
 
 	fmt.Println("v0.0.-5")
@@ -50,6 +52,14 @@ func init() {
 
 func main() {
 
+	db, err := badger.Open(badger.DefaultOptions(dbPath))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	database = db
+
 	if bind != "" {
 		fmt.Println("binding to", bind)
 		serverMode()
@@ -58,12 +68,6 @@ func main() {
 	if sourceDir == "" || gsBucket == "" || processID == "" || serverURL == "" {
 		panic("required args for client, -source, -bucket, -server, -id")
 	}
-
-	db, err := badger.Open(badger.DefaultOptions(dbPath))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
 	err = godirwalk.Walk(sourceDir, &godirwalk.Options{
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
@@ -161,26 +165,56 @@ func serverMode() {
 		bucket := r.FormValue("bucket")
 		object := r.FormValue("object")
 
-		log.Println("incoming object to", bucket, "as", object)
+		dbKey := []byte(bucket + ":" + object)
+		exist := true
 
-		ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
-		defer cancel()
+		_ = database.View(func(txn *badger.Txn) error {
+			_, err := txn.Get(dbKey)
+			if err != nil {
+				exist = false
+			}
+			return nil
+		})
 
-		// Upload an object with storage.Writer.
-		wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
-		if _, err = io.Copy(wc, file); err != nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, "io.Copy:", err.Error())
+		if !exist {
+			log.Println("incoming object to", bucket, "as", object)
+
+			ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
+			defer cancel()
+
+			// Upload an object with storage.Writer.
+			wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
+			if _, err = io.Copy(wc, file); err != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, "io.Copy:", err.Error())
+				return
+			}
+
+			if err := wc.Close(); err != nil {
+				w.WriteHeader(500)
+				fmt.Fprint(w, "Writer.Close:", err.Error())
+				return
+			}
+
+			// Start a writable transaction.
+			txn := database.NewTransaction(true)
+
+			// Use the transaction...
+			err := txn.Set(dbKey, []byte("ok"))
+			if err != nil {
+				log.Println("set err", err)
+			}
+
+			// Commit the transaction and check for error.
+			if err := txn.Commit(); err != nil {
+				log.Println("Commit err", err)
+			}
+
+			w.Write([]byte("success"))
 			return
 		}
 
-		if err := wc.Close(); err != nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, "Writer.Close:", err)
-			return
-		}
-
-		w.Write([]byte("success"))
+		w.Write([]byte("already exist"))
 
 	}
 
