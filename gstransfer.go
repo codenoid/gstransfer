@@ -29,6 +29,7 @@ var gsBucket string
 
 func init() {
 
+	fmt.Println("v0.0.-5")
 	fmt.Println("define -bind flag if you want to use server mode")
 
 	// server mode
@@ -162,7 +163,7 @@ func serverMode() {
 
 		log.Println("incoming object to", bucket, "as", object)
 
-		ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+		ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 		defer cancel()
 
 		// Upload an object with storage.Writer.
